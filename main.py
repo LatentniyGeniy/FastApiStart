@@ -42,6 +42,31 @@ def create_hotel(title:str = Body(embed=True)):
     hotels.append({'id' : hotels[-1]['id'] + 1, 'title' : title})
     return {'status': 'OK'}
 
+@app.put("/hotels/{hotel_id}")
+def edit_hotel(hotel_id:int, title:str = Body(embed=True), name:str = Body(embed=True)):
+    global hotels
+    if hotel_id > 0:
+        hotels[hotel_id-1].update({'title' : title, 'name' : name})
+    else:
+        return {'status': 'Bad id'}
+    return {'status': 'OK'}
+
+
+@app.patch("/hotels/{hotel_id}")
+def patch_hotel(hotel_id:int, title:str | None = Body(None,embed=True), name:str | None = Body(None,embed=True)):
+    global hotels
+    if hotel_id > 0:
+        if  title != None and name != None:
+            edit_hotel(hotel_id, title, name)
+        elif title != None:
+            hotels[hotel_id-1].update({'title' : title})
+        elif name != None:
+            hotels[hotel_id-1].update({'name' : name})
+    else:
+        return {'status': 'Bad id'}
+    return {'status': 'OK'}
+
+
 
 
 @app.get("/docs", include_in_schema=False)
