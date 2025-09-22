@@ -3,71 +3,11 @@ from fastapi import FastAPI, Query, Body
 from fastapi.openapi.docs import get_swagger_ui_html
 import uvicorn
 
+from hotels import router as router_hotels
 
 app = FastAPI()
 
-
-
-hotels = [
-    {'id' : 1, 'title' : 'Minsk', 'name': 'минск' },
-    {'id' : 2,'title' : 'Kenya', 'name': 'кения' },
-]
-
-
-@app.get("/hotels")
-def get_hotels(
-        id:int | None = Query(None, description = "Айди"),
-        title:str | None = Query(None, description = "Название отеля"),
-):
-    hotels_ = []
-    for hotel in hotels:
-        if id and hotel['id'] != id:
-            continue
-        if title and hotel['title'] != title:
-            continue
-        hotels_.append(hotel)
-    return hotels_
-
-
-@app.delete("/hotels/{hotel_id}")
-def delete_hotel(hotel_id:int):
-    global hotels
-    hotels = [ hotel for hotel in hotels if hotel['id'] != hotel_id ]
-    return {'status': 'OK'}
-
-
-@app.post("/hotels")
-def create_hotel(title:str = Body(embed=True)):
-    global hotels
-    hotels.append({'id' : hotels[-1]['id'] + 1, 'title' : title})
-    return {'status': 'OK'}
-
-@app.put("/hotels/{hotel_id}")
-def edit_hotel(hotel_id:int, title:str = Body(embed=True), name:str = Body(embed=True)):
-    global hotels
-    if hotel_id > 0:
-        hotels[hotel_id-1].update({'title' : title, 'name' : name})
-    else:
-        return {'status': 'Bad id'}
-    return {'status': 'OK'}
-
-
-@app.patch("/hotels/{hotel_id}")
-def patch_hotel(hotel_id:int, title:str | None = Body(None,embed=True), name:str | None = Body(None,embed=True)):
-    global hotels
-    if hotel_id > 0:
-        if  title != None and name != None:
-            edit_hotel(hotel_id, title, name)
-        elif title != None:
-            hotels[hotel_id-1].update({'title' : title})
-        elif name != None:
-            hotels[hotel_id-1].update({'name' : name})
-    else:
-        return {'status': 'Bad id'}
-    return {'status': 'OK'}
-
-
-
+app.include_router(router_hotels)
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
